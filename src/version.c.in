@@ -1,0 +1,9 @@
+/**
+ * @APP_NAME@
+ * Copyright (C) 2021 Dale Whinham <daleyo@gmail.com>
+ *
+ * version.c
+ * Embedded version information.
+ */
+
+const char* @APP_NAME@_version = "\0$VER: @APP_NAME@ @GIT_VERSION@.@GIT_REVISION@ (@GIT_DATE@) @GIT_DESCRIPTION@";

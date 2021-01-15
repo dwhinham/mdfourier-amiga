@@ -1,0 +1,17 @@
+MDFourierAudioBlockFile 2.3
+Commodore Amiga
+[VideoModes] 2
+PAL 20.032 313 8000 17 10
+NTSC 16.688 263 8000 14 10
+CLK n
+[MonoBalanceBlock] 99      ;Use 1khz-ish, SPSG# 1
+[ToneLines] 6
+Sync s 1 20 0 red m
+Silence n 1 50 0 aqua m
+TriangleFilterOn 1 84 20 0 red m
+TriangleFilterOff 2 84 20 0 gray m
+Silence n 1 50 0 aqua m
+Sync s 1 20 0 red m
+
+;NTSC Unimplemented for now
+;PAL Hz = 3546895/227/313 (3546895/227/312 for interlaced)
