@@ -1,6 +1,6 @@
 /**
  * mdfourier-amiga
- * Copyright (C) 2021 Dale Whinham <daleyo@gmail.com>
+ * Copyright (C) 2022 Dale Whinham <daleyo@gmail.com>
  *
  * main.c
  * Program entry point.
@@ -218,7 +218,7 @@ static void print_usage()
 {
 	printf
 	(
-		"mdfourier-amiga \xA9 2021 Dale Whinham, Artemio Urbina\n"
+		"mdfourier-amiga \xA9 2022 Dale Whinham, Artemio Urbina\n"
 		"Paula tone generator for the MDFourier audio signature analyzer.\n\n"
 		"-h/--help:    Show this help text\n"
 		"-v/--verbose: Enable verbose logging\n"

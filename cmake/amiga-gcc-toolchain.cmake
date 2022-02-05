@@ -1,5 +1,5 @@
 # Amiga-GCC toolchain file for CMake
-# Copyright (C) 2020 Dale Whinham <daleyo@gmail.com>
+# Copyright (C) 2022 Dale Whinham <daleyo@gmail.com>
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1.2)

@@ -1,6 +1,6 @@
 /**
  * mdfourier-amiga
- * Copyright (C) 2021 Dale Whinham <daleyo@gmail.com>
+ * Copyright (C) 2022 Dale Whinham <daleyo@gmail.com>
  *
  * vblank.h
  * VBlank interrupt server management.

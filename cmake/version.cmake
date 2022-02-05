@@ -1,5 +1,5 @@
 # CMake script to generate embedded version information from git description
-# Copyright (C) 2020 Dale Whinham <daleyo@gmail.com>
+# Copyright (C) 2022 Dale Whinham <daleyo@gmail.com>
 
 # Generate version information - requires a git tag to be present in the format "vX.Y"
 execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --dirty
