@@ -14,6 +14,7 @@ extern const uint8_t waveform_period_table_pal[12];
 extern const uint8_t waveform_period_table_ntsc[12];
 
 /* Sample data must reside in chip RAM */
+extern const int8_t __chip waveform_silence[2];
 extern const int8_t __chip waveform_sync_pulse[2];
 extern const int8_t __chip waveform_triangle_octave_1[512];
 extern const int8_t __chip waveform_triangle_octave_2[256];

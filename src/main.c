@@ -38,6 +38,7 @@ static uint32_t frame_counter = 0;
 /* ~8000Hz */
 #define SYNC_PULSE_PERIOD_PAL	222
 #define SYNC_PULSE_PERIOD_NTSC	222
+#define DMA_WAIT_RASTER_LINES	5
 
 #define SYNC_PULSE_LEN_FRAMES	20
 #define SILENCE_LEN_FRAMES	50
@@ -71,6 +72,41 @@ static const size_t sample_lengths[] =
 	SAMPLE_LEN_WORDS(waveform_triangle_octave_7),
 };
 
+void wait_raster_lines(uint8_t lines)
+{
+	UBYTE line = custom.vhposr_h + lines;
+	while (custom.vhposr_h != line);
+}
+
+void play_channels(uint8_t channel_mask, const uint8_t* data, size_t length_words, uint8_t period)
+{
+	/* Kill DMA and wait to take effect */
+	custom.dmacon = channel_mask;
+	wait_raster_lines(DMA_WAIT_RASTER_LINES);
+
+	/* Set sample pointer/length/period */
+	for (uint8_t i = 0; i < 4; ++i)
+	{
+		if (channel_mask & (DMAF_AUD0 << i))
+		{
+			custom.aud[i].ac_ptr = (UWORD*) data;
+			custom.aud[i].ac_len = length_words;
+			custom.aud[i].ac_per = period;
+		}
+	}
+
+	/* Start DMA */
+	custom.dmacon = DMAF_SETCLR | channel_mask;
+}
+
+void stop_channels(uint8_t channel_mask)
+{
+	play_channels(channel_mask, waveform_silence, SAMPLE_LEN_WORDS(waveform_silence), 1);
+
+	/* Wait for DMA to take effect */
+	wait_raster_lines(DMA_WAIT_RASTER_LINES);
+}
+
 static void sync_pulse(uint32_t frame)
 {
 	if (frame == 0)
@@ -102,6 +138,7 @@ static void silence(uint32_t frame)
 	/* Stop audio on first frame */
 	if (frame == 0)
 	{
+		stop_channels(DMAF_AUDIO);
 		custom.aud[0].ac_vol = 0;
 		custom.aud[1].ac_vol = 0;
 		custom.aud[2].ac_vol = 0;
@@ -126,26 +163,19 @@ static void triangle_scale(uint32_t frame)
 		current_note = 0;
 		current_octave = 0;
 
-		/* Setup audio */
-		uint8_t channel = channels[current_channel_index];
-		custom.aud[channel].ac_ptr = (UWORD*) triangle_waveforms[current_octave];
-		custom.aud[channel].ac_len = sample_lengths[current_octave];
-		custom.aud[channel].ac_per = waveform_period_table_pal[current_note];
-		custom.aud[channel].ac_vol = 64;
+		custom.aud[0].ac_vol = 64;
+		custom.aud[3].ac_vol = 0;
+		play_channels(DMAF_AUD0 | DMAF_AUD3, triangle_waveforms[current_octave], sample_lengths[current_octave], waveform_period_table_pal[current_note]);
 
-		/* Start audio */
-		custom.dmacon = (DMAF_SETCLR | (DMAF_AUD0 << channel));
-
-		DEBUG_LOG("channel %ld, octave %ld, note %ld\n", channel, current_octave, current_note);
+		DEBUG_LOG("channel 0, octave %ld, note %ld\n", current_octave, current_note);
 	}
 	else if (note_frames == SCALE_NOTE_LEN_FRAMES)
 	{
 		note_frames = 0;
 
-		/* Stop audio on current channel */
+		/* Mute current channel */
 		uint8_t channel = channels[current_channel_index];
 		custom.aud[channel].ac_vol = 0;
-		//custom.dmacon = DMAF_AUD0 << channel;
 
 		++current_channel_index;
 		if (current_channel_index == 4)
@@ -157,16 +187,30 @@ static void triangle_scale(uint32_t frame)
 				++current_octave;
 				current_note = 0;
 			}
+
+			/* Start playback on first pair of channels */
+			stop_channels(DMAF_AUD0 | DMAF_AUD3);
+			custom.aud[0].ac_vol = 64;
+			custom.aud[3].ac_vol = 0;
+			play_channels(DMAF_AUD0 | DMAF_AUD3, triangle_waveforms[current_octave], sample_lengths[current_octave], waveform_period_table_pal[current_note]);
+
+		}
+		else if (current_channel_index == 2)
+		{
+			/* Swap to other pair */
+			stop_channels(DMAF_AUD1 | DMAF_AUD2);
+			custom.aud[1].ac_vol = 64;
+			custom.aud[2].ac_vol = 0;
+			play_channels(DMAF_AUD1 | DMAF_AUD2, triangle_waveforms[current_octave], sample_lengths[current_octave], waveform_period_table_pal[current_note]);
+		}
+		else
+		{
+			/* Unmute next channel */
+			channel = channels[current_channel_index];
+			custom.aud[channel].ac_vol = 64;
 		}
 
 		DEBUG_LOG("channel %ld, octave %ld, note %ld\n", channel, current_octave, current_note);
-
-		channel = channels[current_channel_index];
-		custom.aud[channel].ac_ptr = (UWORD*) triangle_waveforms[current_octave];
-		custom.aud[channel].ac_len = sample_lengths[current_octave];
-		custom.aud[channel].ac_per = waveform_period_table_pal[current_note];
-		custom.aud[channel].ac_vol = 64;
-		custom.dmacon = (DMAF_SETCLR | (DMAF_AUD0 << channel));
 	}
 
 	++note_frames;
@@ -185,11 +229,7 @@ static void disable_led_filter(uint32_t frame)
 static void end(uint32_t frame)
 {
 	/* Stop audio */
-	custom.aud[0].ac_vol = 0;
-	custom.aud[1].ac_vol = 0;
-	custom.aud[2].ac_vol = 0;
-	custom.aud[3].ac_vol = 0;
-	custom.dmacon = DMAF_AUDIO;
+	stop_channels(DMAF_AUDIO);
 	DEBUG_LOG("Disabling vblank\n");
 	vblank_enable_server(false);
 }
@@ -226,6 +266,13 @@ static void vblank_proc()
 	/* End of non-zero-frame phase */
 	if (current_phase->length_frames != 0 && current_phase_frames == current_phase->length_frames)
 	{
+		/* Stop audio and reset volume */
+		stop_channels(DMAF_AUDIO);
+		custom.aud[0].ac_vol = 64;
+		custom.aud[1].ac_vol = 64;
+		custom.aud[2].ac_vol = 64;
+		custom.aud[3].ac_vol = 64;
+
 		current_phase_frames = 0;
 		++current_phase;
 		Signal(task, 1 << signal_bit);

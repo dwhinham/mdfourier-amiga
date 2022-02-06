@@ -8,8 +8,6 @@
 
 #include "waveform.h"
 
-const int8_t __chip waveform_sync_pulse[2] = { -128, 127 };
-
 const uint8_t waveform_period_table_pal[12] =
 {
 	252,	/* A  */
@@ -41,6 +39,18 @@ const uint8_t waveform_period_table_ntsc[12] =
 	143,	/* G  */
 	135,	/* G# */
 };
+
+// HACK: prevent zero array from going into the .bss section
+asm
+(
+	"	.globl	_waveform_silence\n"
+	"	.datachip\n"
+	"_waveform_silence:\n"
+	"	.byte	0\n"
+	"	.byte	0\n"
+);
+
+const int8_t __chip waveform_sync_pulse[2] = { -128, 127 };
 
 const int8_t __chip waveform_triangle_octave_1[512] =
 {
