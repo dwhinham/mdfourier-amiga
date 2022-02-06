@@ -8,8 +8,8 @@ CLK n
 [ToneLines] 6
 Sync s 1 20 0 red m
 Silence n 1 50 0 aqua m
-TriangleFilterOn 1 84 20 0 red m
-TriangleFilterOff 2 84 20 0 gray m
+TriangleFilterOn 1 336 10 0 red m
+TriangleFilterOff 2 336 10 0 gray m
 Silence n 1 50 0 aqua m
 Sync s 1 20 0 red m
 
