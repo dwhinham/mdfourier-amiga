@@ -41,6 +41,7 @@ static uint32_t frame_counter = 0;
 #define DMA_WAIT_RASTER_LINES	5
 
 #define SYNC_PULSE_LEN_FRAMES	20
+#define BALANCE_CHK_LEN_FRAMES	5
 #define SILENCE_LEN_FRAMES	50
 #define SCALE_NOTE_LEN_FRAMES	10
 #define SCALE_NOTES_PER_OCTAVE	12
@@ -139,11 +140,14 @@ static void silence(uint32_t frame)
 	if (frame == 0)
 	{
 		stop_channels(DMAF_AUDIO);
-		custom.aud[0].ac_vol = 0;
-		custom.aud[1].ac_vol = 0;
-		custom.aud[2].ac_vol = 0;
-		custom.aud[3].ac_vol = 0;
-		custom.dmacon = DMAF_AUDIO;
+	}
+}
+
+static void balance_check(uint32_t frame)
+{
+	if (frame == 0)
+	{
+		play_channels(DMAF_AUD0 | DMAF_AUD1, triangle_waveforms[4], sample_lengths[4], waveform_period_table_pal[4]);
 	}
 }
 
@@ -248,6 +252,7 @@ static const test_phase_t timeline[] =
 	{ 0,				disable_led_filter,		NULL							},
 	{ SYNC_PULSE_LEN_FRAMES,	sync_pulse,			"Start sync pulse"					},
 	{ SILENCE_LEN_FRAMES,		silence,			"Silence"						},
+	{ BALANCE_CHK_LEN_FRAMES,	balance_check,			"Middle C triangle wave; channels 0, 1 (balance check)" },
 	{ SCALE_LEN_FRAMES,		triangle_scale,			"Triangle wave scale; channels 0, 3, 1, 2 (LED off)"	},
 	{ 0,				enable_led_filter,		NULL							},
 	{ SCALE_LEN_FRAMES,		triangle_scale,			"Triangle wave scale; channels 0, 3, 1, 2 (LED on)"	},
