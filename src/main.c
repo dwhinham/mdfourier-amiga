@@ -114,11 +114,11 @@ static void sync_pulse(uint32_t frame)
 	{
 		/* Setup sync audio */
 		custom.aud[0].ac_ptr = (UWORD*) waveform_sync_pulse;
-		custom.aud[0].ac_len = sizeof(waveform_sync_pulse) / 2;
+		custom.aud[0].ac_len = SAMPLE_LEN_WORDS(waveform_sync_pulse);
 		custom.aud[0].ac_vol = 64;
 		custom.aud[0].ac_per = SYNC_PULSE_PERIOD_PAL;
 		custom.aud[1].ac_ptr = (UWORD*) waveform_sync_pulse;
-		custom.aud[1].ac_len = sizeof(waveform_sync_pulse) / 2;
+		custom.aud[1].ac_len = SAMPLE_LEN_WORDS(waveform_sync_pulse);
 		custom.aud[1].ac_vol = 64;
 		custom.aud[1].ac_per = SYNC_PULSE_PERIOD_PAL;
 
