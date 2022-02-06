@@ -9,6 +9,8 @@ CLK n
 Sync s 1 20 0 red m
 Silence n 1 50 0 aqua m
 BalanceCheck n 1 1 5 aqua m
+TriangleFilterOn 1 336 10 0 red s
+TriangleFilterOff 2 336 10 0 gray s
 Silence n 1 50 0 aqua m
 Sync s 1 20 0 red m
 
