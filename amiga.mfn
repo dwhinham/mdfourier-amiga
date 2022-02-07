@@ -1,17 +1,19 @@
 MDFourierAudioBlockFile 2.3
 Commodore Amiga
 [VideoModes] 2
-PAL 20.032 313 8000 17 10
+PAL 20.03288 313 8000 17 10
 NTSC 16.688 263 8000 14 10
 CLK n
-[MonoBalanceBlock] 2
-[ToneLines] 7
+[MonoBalanceBlock] 6
+[ToneLines] 9
 Sync s 1 20 0 red m
-Silence n 1 50 0 aqua m
-BalanceCheck n 1 1 5 aqua m
+	skip k 1 10 0 red m
+Silence n 4 10 0 aqua m
+	BalanceCheck k 1 5 0 aqua m
 TriangleFilterOn 1 336 10 0 red s
 TriangleFilterOff 2 336 10 0 gray s
-Silence n 1 50 0 aqua m
+	skip k 1 10 0 red m
+Silence n 4 10 0 aqua m
 Sync s 1 20 0 red m
 
 ;NTSC Unimplemented for now
